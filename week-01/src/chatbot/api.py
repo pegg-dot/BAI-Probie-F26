@@ -37,8 +37,9 @@ from src.chatbot.models import ChatMessage
 # Example usage after completion:
 #   client = create_client()
 #
-# Your code here:
-# def create_client() -> ...:
+def create_client() -> OpenAI:
+    """Create the OpenAI client used for every API call, authenticated with our key."""
+    return OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 # TODO: Implement get_chat_response function
@@ -104,5 +105,7 @@ from src.chatbot.models import ChatMessage
 # Example usage after completion:
 #   system_msg = create_system_message()
 #
-# Your code here:
+def create_system_message() -> ChatMessage:
+    """Build the system message that sets the chatbot's personality and rules."""
+    return ChatMessage(role="system", content=SYSTEM_PROMPT)
 
