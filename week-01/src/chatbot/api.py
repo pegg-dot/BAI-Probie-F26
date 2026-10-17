@@ -13,7 +13,7 @@ Key Concepts:
 - Error handling: Gracefully handle things that can go wrong
 """
 
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
 from typing import List
 
 from src.settings import settings
@@ -89,7 +89,28 @@ def create_client() -> OpenAI:
 #         # so the main program can decide what to do
 #         raise
 #
-# Your code here:
+def get_chat_response(
+    client: OpenAI, messages: List[ChatMessage], model: str
+) -> ChatMessage:
+    """Send the whole conversation to OpenAI and return the assistant's reply."""
+    try:
+        # OpenAI wants plain dicts, not our ChatMessage objects
+        message_dicts = [msg.model_dump() for msg in messages]
+
+        response = client.chat.completions.create(
+            model=model,
+            messages=message_dicts,
+        )
+
+        # choices is a list because the API can return several candidate replies;
+        # we only asked for one, so we take the first
+        reply = response.choices[0].message
+
+        # Run the reply back through ChatMessage so it gets the same validation
+        return ChatMessage(role="assistant", content=reply.content or "")
+    except OpenAIError as e:
+        # Re-raise so main.py decides how to show it, with a clearer message
+        raise RuntimeError(f"OpenAI request failed: {e}") from e
 
 
 # TODO: Implement create_system_message function (Helper Function)
