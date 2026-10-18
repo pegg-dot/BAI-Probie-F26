@@ -53,17 +53,13 @@ def run_conversation_loop() -> None:
     We start with a system message to set the chatbot's personality.
     """
     
-    # TODO: Create OpenAI client
-    
-    
-    # TODO: Initialize conversation history
-    # Instructions:
-    # 1. Create a system message using create_system_message() (no parameters needed!)
-    # 2. Create a list called 'conversation_history' with just the system message
-    # 3. This list will grow as the conversation progresses
-    #
-    # Hint: conversation_history should be a List[ChatMessage] type
-    
+    # Build the OpenAI client once; every turn reuses it
+    client = create_client()
+
+    # The history starts with only the system message. Each turn will add
+    # the user's message and the assistant's reply, so this list IS the bot's memory.
+    conversation_history: List[ChatMessage] = [create_system_message()]
+
     
     ui.display_welcome()
     
