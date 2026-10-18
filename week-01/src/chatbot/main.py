@@ -20,6 +20,7 @@ from typing import List
 from src.chatbot.models import ChatMessage
 from src.chatbot.api import create_client, get_chat_response, create_system_message
 from src.chatbot import ui
+from src.settings import settings
 
 
 def should_quit(user_input: str) -> bool:
@@ -79,16 +80,21 @@ def run_conversation_loop() -> None:
                 ui.display_error("Please enter a message!")
                 continue
             
-            # TODO: Create and store user message
-            # Code here
-            
-            ui.display_loading()
-            
-            # TODO: Get AI response from OpenAI and display it
-            # Code here
+            user_message = ChatMessage(role="user", content=user_input)
 
-            ui.display_assistant_message("NOT IMPLEMENTED YET")
-            
+            ui.display_loading()
+
+            # Send the history plus the new message. We only save the turn to
+            # the history after the reply arrives, so a failed request doesn't
+            # leave a dangling user message behind.
+            reply = get_chat_response(
+                client, conversation_history + [user_message], settings.OPENAI_MODEL
+            )
+            conversation_history.append(user_message)
+            conversation_history.append(reply)
+
+            ui.display_assistant_message(reply.content)
+
         except KeyboardInterrupt:
             ui.display_goodbye()
             break
