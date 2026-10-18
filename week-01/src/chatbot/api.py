@@ -14,11 +14,10 @@ Key Concepts:
 """
 
 from openai import OpenAI, OpenAIError
-from typing import List
 
-from src.settings import settings
 from src.chatbot.constants import SYSTEM_PROMPT
 from src.chatbot.models import ChatMessage
+from src.settings import settings
 
 
 # TODO: Implement create_client function
@@ -49,7 +48,7 @@ def create_client() -> OpenAI:
 # Instructions:
 # 1. Create a function called get_chat_response with these parameters:
 #    - client: OpenAI
-#    - messages: List[ChatMessage]
+#    - messages: list[ChatMessage]
 #    - model: str (which GPT model to use)
 # 2. Return type should be ChatMessage (the assistant's reply)
 # 3. Convert the ChatMessage objects to dictionaries (OpenAI expects dicts)
@@ -71,13 +70,13 @@ def create_client() -> OpenAI:
 #     try:
 #         # Convert messages to dicts
 #         message_dicts = [msg.model_dump() for msg in messages]
-#         
+#
 #         # Call OpenAI API
 #         response = client.chat.completions.create(...)
-#         
+#
 #         # Extract the assistant's message
 #         assistant_message = response.choices[0].message
-#         
+#
 #         # Create and return ChatMessage
 #         return ChatMessage(
 #             role=assistant_message.role,
@@ -90,7 +89,7 @@ def create_client() -> OpenAI:
 #         raise
 #
 def get_chat_response(
-    client: OpenAI, messages: List[ChatMessage], model: str
+    client: OpenAI, messages: list[ChatMessage], model: str
 ) -> ChatMessage:
     """Send the whole conversation to OpenAI and return the assistant's reply."""
     try:
@@ -129,4 +128,3 @@ def get_chat_response(
 def create_system_message() -> ChatMessage:
     """Build the system message that sets the chatbot's personality and rules."""
     return ChatMessage(role="system", content=SYSTEM_PROMPT)
-

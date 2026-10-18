@@ -15,24 +15,22 @@ Functional Programming Approach:
 - We compose smaller functions to build larger behaviors
 """
 
-from typing import List
-
-from src.chatbot.models import ChatMessage
-from src.chatbot.api import create_client, get_chat_response, create_system_message
 from src.chatbot import ui
+from src.chatbot.api import create_client, create_system_message, get_chat_response
+from src.chatbot.models import ChatMessage
 from src.settings import settings
 
 
 def should_quit(user_input: str) -> bool:
     """
     Check if the user wants to quit the conversation.
-    
+
     Args:
         user_input: The user's message
-        
+
     Returns:
         True if the user wants to quit, False otherwise
-        
+
     This is a pure function - same input always gives same output.
     We check for common quit commands (case-insensitive).
     """
@@ -43,43 +41,42 @@ def should_quit(user_input: str) -> bool:
 def run_conversation_loop() -> None:
     """
     Main conversation loop - the heart of the chatbot!
-    
+
     This function:
     1. Sets up the OpenAI client
     2. Displays the welcome message
     3. Runs the conversation loop until the user quits
     4. Handles errors gracefully
-    
+
     The conversation history is stored as a list of ChatMessage objects.
     We start with a system message to set the chatbot's personality.
     """
-    
+
     # Build the OpenAI client once; every turn reuses it
     client = create_client()
 
     # The history starts with only the system message. Each turn will add
     # the user's message and the assistant's reply, so this list IS the bot's memory.
-    conversation_history: List[ChatMessage] = [create_system_message()]
+    conversation_history: list[ChatMessage] = [create_system_message()]
 
-    
     ui.display_welcome()
-    
+
     # TODO: Main conversation loop
     # This is the core of the chatbot - it runs until the user quits.
     while True:
         try:
             user_input = ui.get_user_input()
-            
+
             # Check if user wants to quit
             if should_quit(user_input):
                 ui.display_goodbye()
                 break
-            
+
             # Validate that input is not empty
             if not user_input:
                 ui.display_error("Please enter a message!")
                 continue
-            
+
             user_message = ChatMessage(role="user", content=user_input)
 
             ui.display_loading()
@@ -98,7 +95,7 @@ def run_conversation_loop() -> None:
         except KeyboardInterrupt:
             ui.display_goodbye()
             break
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - keep the chat alive on any error
             ui.display_error(f"An error occurred: {e}")
             continue
 
@@ -106,7 +103,7 @@ def run_conversation_loop() -> None:
 def main() -> None:
     """
     Entry point for the chatbot application.
-    
+
     This function is called when you run: python -m src.chatbot.main
     It wraps the conversation loop with top-level error handling.
     """
@@ -116,14 +113,15 @@ def main() -> None:
         # User pressed Ctrl+C - exit gracefully
         print("\n")  # New line after ^C
         ui.display_goodbye()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - keep the chat alive on any error
         # Unexpected error - show it and exit
         ui.display_error(f"Fatal error: {e}")
-        ui.display_system_message("Please check your configuration and try again.", "red")
+        ui.display_system_message(
+            "Please check your configuration and try again.", "red"
+        )
 
 
 # This is a Python idiom - code here only runs if this file is executed directly
 # (not if it's imported as a module)
 if __name__ == "__main__":
     main()
-
